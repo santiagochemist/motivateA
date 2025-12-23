@@ -16,6 +16,9 @@ jobs:
   sync:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write   # <-- THIS IS CRITICAL
+
     steps:
       - name: Checkout source branch
         uses: actions/checkout@v4
@@ -30,7 +33,7 @@ jobs:
 
       - name: Push to Repo A
         run: |
-          git remote add repoA https://github.com/santiagochemist/motivateA.git
+          git remote add repoA https://x-access-token:${{ github.token }}@github.com/santiagochemist/motivateA.git
           git push repoA \
             "${{ inputs.source_branch }}:${{ inputs.target_branch }}" \
             --force
