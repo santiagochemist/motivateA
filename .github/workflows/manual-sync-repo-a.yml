@@ -24,7 +24,7 @@ jobs:
           ref: ${{ inputs.source_branch }}
           fetch-depth: 0
 
-      # 2️⃣ Debug: verify the secret is available
+      # 2️⃣ Debug: verify the secret is present
       - name: Verify PAT secret
         run: |
           if [ -z "${{ secrets.REPO_A_TOKEN }}" ]; then
@@ -34,13 +34,18 @@ jobs:
             echo "✅ REPO_A_TOKEN is PRESENT"
           fi
 
-      # 3️⃣ Configure Git
+      # 3️⃣ Debug: test PAT access to Repo A
+      - name: Test PAT authentication
+        run: |
+          git ls-remote https://x-access-token:${{ secrets.REPO_A_TOKEN }}@github.com/santiagochemist/motivateA.git
+          
+      # 4️⃣ Configure Git
       - name: Configure Git
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-      # 4️⃣ Push the selected branch to Repo A (authenticated)
+      # 5️⃣ Push the selected branch to Repo A (authenticated)
       - name: Push to Repo A
         run: |
           git remote add repoA https://x-access-token:${{ secrets.REPO_A_TOKEN }}@github.com/santiagochemist/motivateA.git
