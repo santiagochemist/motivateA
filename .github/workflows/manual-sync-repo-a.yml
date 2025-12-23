@@ -4,9 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       source_branch:
+        description: "Source branch in Repo B"
         required: true
         default: "main"
       target_branch:
+        description: "Target branch in Repo A"
         required: true
         default: "main"
 
@@ -20,7 +22,7 @@ jobs:
         with:
           ref: ${{ inputs.source_branch }}
           fetch-depth: 0
-          persist-credentials: false   # 🔴 IMPORTANT
+          persist-credentials: false   # IMPORTANT
 
       - name: Verify PAT secret
         run: |
@@ -31,16 +33,18 @@ jobs:
             echo "✅ REPO_A_TOKEN is PRESENT"
           fi
 
-      - name: Test PAT authentication
-        run: |
-          git ls-remote https://x-access-token:${{ secrets.REPO_A_TOKEN }}@github.com/santiagochemist/motivateA.git
-
       - name: Configure Git
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-      - name: Push to Repo A (FORCED AUTH)
+      # 🔴 Remove workflow files so PAT does NOT need workflow scope
+      - name: Remove workflow files before sync
+        run: |
+          git rm -r --cached .github/workflows || true
+          git commit -m "Exclude workflows from mirror sync" || true
+
+      - name: Push to Repo A
         run: |
           git push https://x-access-token:${{ secrets.REPO_A_TOKEN }}@github.com/santiagochemist/motivateA.git \
             "${{ inputs.source_branch }}:${{ inputs.target_branch }}" \
